@@ -1,0 +1,1 @@
+#This function will take in 2 arrays of GPS points and output an array the size of the larger of the two, containing 1D index for the closest point of the input array
