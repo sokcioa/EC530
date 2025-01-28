@@ -1,3 +1,5 @@
+from GPSArray2Array import *
+
 def correct_test():
   BostonMA = (42.3601, -71.0589)
   JawsBridgeMA = (41.4164, -70.5482)
@@ -59,4 +61,8 @@ def fail_test3():
   arr2 = np.array([DorchesterMA,CambridgeMA,ArlingtonMA,BangorME,PlymouthNH,QuincyMA, JawsBridgeMA])
   arr2arr_match(arr1, arr2, 0)
 
-def test()
+def test():
+  correct_test()
+  fail_test1()
+  fail_test2()
+  fail_test3()
