@@ -1,77 +1,73 @@
 #This function will take in 2 arrays of GPS points and output an array the size of the larger of the two
 #containing 1D index for the closest point of the input array
 import numpy as np
-import math
-
-def p2p_dist(point1, point2, Rad=0): 
-  '''
-  Takes in 2 Lat, Lon points and whether they are in radians or degrees 
-  Converts to radians if need be, then using hahversine formula to compute the distance
-  ChatGPT pointed me to haversine formula as longitudinal distance changes based on lat
-  found here: https://www.movable-type.co.uk/scripts/latlong.html
-  '''
-  assert len(point1) == 2, "invalid first point"
-  assert len(point2) == 2, "invalid second point"
-  assert isinstance(point1, (list, tuple)), "Point one must be a list or tuple"
-  assert isinstance(point2, (list, tuple)), "Point two must be a list or tuple"
-  assert all(isinstance(xy1, (float)) for xy1 in point1), "All elements must be float"
-  assert all(isinstance(xy2, (float)) for xy2 in point2), "All elements must be float"
-  #use haversine formula for GPS distance
-  #compute delta lat/lon
-  if Rad:
-    dlat = point1[0] - point2[0]
-    dlon = point1[1] - point2[1]
-    theta1 = point1[0]
-    theta2 = point2[0]
-  else: #convert to Rad if need be
-    dlat = (point1[0] - point2[0])*math.pi/180
-    dlon = (point1[1] - point2[1])*math.pi/180
-    theta1 = point1[0]*math.pi/180
-    theta2 = point2[0]*math.pi/180
-    phi1 = point1[1]*math.pi/180
-    phi2 = point2[1]*math.pi/180
-  # Latitude and longitude range validity check
-  assert -math.pi/2 <= theta1 <= math.pi/2, f"Latitude of point1 invalid or you did not specify degrees: { point1 }"
-  assert -math.pi/2 <= theta2 <= math.pi/2, f"Longitude of point2 invalid or you did not specify degrees: { point2 }"
-  assert -math.pi <= phi1 <= math.pi, f"Longitude of point1 invalid or you did not specify degrees: { point1 }"
-  assert -math.pi <= phi2 <= math.pi, f"Longitude of point2 invalid or you did not specify degrees: { point2 }"
-
-  a = math.sin(dlat / 2)**2 + math.cos(theta1) * math.cos(theta2) * math.sin(dlon / 2)**2
-  c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-  return c*6371000
-  
-
+import traceback
 
 def p2arr_dist(point, refarray, rad=0):
   assert isinstance(refarray, np.ndarray), "Ref Array must be np array"
-  assert refarray.size > 0, "Ref array must not be empty"
-  dist_arr = np.zeros(refarray.shape[0])
-  for idx in range(refarray.shape[0]):
-    dist_arr[idx] = p2p_dist(point, tuple(refarray[idx]), rad)
+  assert refarray.size > 0, "Ref array must not be empty"  
+  assert refarray.ndim == 2 and refarray.shape[1] == 2, "Ref array must be Nx2."
+  assert len(point) == 2, "point must have two coordinates (latitude, longitude)."
+  assert isinstance(point, (list, tuple, np.ndarray)), "point must be a list, tuple, or numpy array."
+
+  if not rad: #make radian for trig
+      point = np.radians(point)
+      refarray = np.radians(refarray)
+  #parse for easy reference
+  lat1, lon1 = point
+  lat2, lon2 = refarray[:, 0], refarray[:, 1]
+  
+  # Latitude and longitude range validity check
+  assert -np.pi/2 <= lat1 <= np.pi/2, f"Latitude of point1 invalid: {lat1}"
+  assert np.all((-np.pi/2 <= lat2) & (lat2 <= np.pi/2)), "Invalid latitudes in refarray."
+  assert -np.pi <= lon1 <= np.pi, f"Longitude of point1 invalid: {lon1}"
+  assert np.all((-np.pi <= lon2) & (lon2 <= np.pi)), "Invalid longitudes in refarray."
+
+  # haversine formula
+  dlat = lat2 - lat1  #should be same N as refarray
+  dlon = lon2 - lon1  #should be same N as refarray
+  a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2 #should be same N as refarray
+  c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a)) #should be same N as refarray
+  R = 6371000  # Earth radius in meters
+  dist_arr = R * c
   return dist_arr
 
-
 def arr2arr_match(arr1, arr2, rad):
-  assert isinstance(arr1, np.ndarray), "Ref Array must be np array"
-  assert arr1.size > 0, "Ref array must not be empty"
-  assert isinstance(arr2, np.ndarray), "Ref Array must be np array"
-  assert arr2.size > 0, "Ref array must not be empty"
-  if arr2.size > arr1.size:
-    min_dist_idxs = np.zeros(arr2.shape[0], 'int')
-    idxes = range(arr2.shape[0])
-    for idx2 in idxes: 
-      distlist = p2arr_dist(tuple(arr2[idx2]), arr1, rad)
-      min_index = np.argmin(distlist)
-      min_dist_idxs[idx2] = min_index
-  else:
-    min_dist_idxs = np.zeros_like(arr1.shape[0])
-    idxes = range(arr1.shape[0])
-    for idx1 in idxes: 
-      distlist = p2arr_dist(tuple(arr1[idx1]), arr2, rad)
-      min_index = np.argmin(distlist)
-      min_dist_idxs[idx1] = min_index
-  return min_dist_idxs
+  assert arr1.dtype == float, "arr1 must not contain non-numeric values like None or Strings"
+  assert arr2.dtype == float, "arr2 must not contain non-numeric values like None or Strings"
+  assert not np.any(np.isnan(arr1)), "arr1 must not contain NaN values."
+  assert not np.any(np.isnan(arr2)), "arr2 must not contain NaN values."
+  assert isinstance(arr1, np.ndarray), "arr1 Array must be np array"
+  assert arr1.size > 0, "arr1 array must not be empty"
+  assert isinstance(arr2, np.ndarray), "arr2 Array must be np array"
+  assert arr2.size > 0, "arr2 array must not be empty"
+  assert arr1.ndim == 2 and arr1.shape[1] == 2, "arr1 array must be Nx2."
+  assert arr2.ndim == 2 and arr2.shape[1] == 2, "arr2 array must be Mx2."
+
+  if not rad: #make radian for trig
+      arr1 = np.radians(arr1)
+      arr2 = np.radians(arr2)
+  #parse for easy reference
+  lat1, lon1 = arr1[:,0], arr1[:, 1]
+  lat2, lon2 = arr2[:,0], arr2[:, 1]
+  
+  # Latitude and longitude range validity check
+  assert np.all((-np.pi/2 <= lat1) & (lat1 <= np.pi/2)), "1 or more latitudes in arr1 are invalid."
+  assert np.all((-np.pi/2 <= lat2) & (lat2 <= np.pi/2)), "1 or more latitudes in arr2 are invalid."
+  assert np.all((-np.pi <= lon1) & (lon1 <= np.pi)), "1 or more longitudes in arr1 are invalid."
+  assert np.all((-np.pi <= lon2) & (lon2 <= np.pi)), "1 or more longitudes in arr2 are invalid."
+  #reshape for array opperations
+  lat1 = lat1[:, np.newaxis]  # Shape (M, 1)
+  lon1 = lon1[:, np.newaxis]  # Shape (M, 1)
+  dlat = lat2[np.newaxis,:] - lat1  #should be  MxN 
+  dlon = lon2[np.newaxis,:] - lon1  #should be same MxN 
+  # haversine formula
+  a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2 #should be same MxN
+  c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a)) #should be same MxN as refarray
+  R = 6371000  # Earth radius in meters
+  dist_arr = R * c
+  min_dist_idxs = np.argmin(dist_arr, axis=1)
+  return min_dist_idxs  
 
 def correct_test():
   BostonMA = (42.3601, -71.0589)
@@ -87,7 +83,7 @@ def correct_test():
   arr1 = np.array([BostonMA, RumneyNH, CapeCodMA])
   arr2 = np.array([DorchesterMA,CambridgeMA,ArlingtonMA,BangorME,PlymouthNH,QuincyMA, JawsBridgeMA])
   answer = np.array([0, 0, 0, 1, 1, 0, 2], 'int')
-  print(f"{arr2arr_match(arr1, arr2, 0)}\n{answer}")
+  print(f"{arr2arr_match(arr2, arr1, 0)}\n{answer}")
 
 def fail_test1(): 
   BostonMA = (42.3601, -71.0589)
@@ -140,18 +136,18 @@ def test():
     fail_test1()
   except Exception as e: 
     print(f"fail_test1 failed: {e}")
+    #traceback.print_exc()
   try:
     fail_test2()
   except Exception as e: 
-    print(f"fail_test2 failed: {e}")
+    print(f"fail_test2 failed: {e}") 
+    #traceback.print_exc()
   try:
     fail_test3()
   except Exception as e: 
     print(f"fail_test3 failed: {e}")
+    #traceback.print_exc()
 
-if __name__ == "__main__":
-    # Run the test function
-    test()
 
 
 
