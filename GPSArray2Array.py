@@ -1,38 +1,8 @@
 #This function will take in 2 arrays of GPS points and output an array the size of the larger of the two
 #containing 1D index for the closest point of the input array
 import numpy as np
-import traceback
 
-def p2arr_dist(point, refarray, rad=0):
-  assert isinstance(refarray, np.ndarray), "Ref Array must be np array"
-  assert refarray.size > 0, "Ref array must not be empty"  
-  assert refarray.ndim == 2 and refarray.shape[1] == 2, "Ref array must be Nx2."
-  assert len(point) == 2, "point must have two coordinates (latitude, longitude)."
-  assert isinstance(point, (list, tuple, np.ndarray)), "point must be a list, tuple, or numpy array."
-
-  if not rad: #make radian for trig
-      point = np.radians(point)
-      refarray = np.radians(refarray)
-  #parse for easy reference
-  lat1, lon1 = point
-  lat2, lon2 = refarray[:, 0], refarray[:, 1]
-  
-  # Latitude and longitude range validity check
-  assert -np.pi/2 <= lat1 <= np.pi/2, f"Latitude of point1 invalid: {lat1}"
-  assert np.all((-np.pi/2 <= lat2) & (lat2 <= np.pi/2)), "Invalid latitudes in refarray."
-  assert -np.pi <= lon1 <= np.pi, f"Longitude of point1 invalid: {lon1}"
-  assert np.all((-np.pi <= lon2) & (lon2 <= np.pi)), "Invalid longitudes in refarray."
-
-  # haversine formula
-  dlat = lat2 - lat1  #should be same N as refarray
-  dlon = lon2 - lon1  #should be same N as refarray
-  a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2 #should be same N as refarray
-  c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a)) #should be same N as refarray
-  R = 6371000  # Earth radius in meters
-  dist_arr = R * c
-  return dist_arr
-
-def arr2arr_match(arr1, arr2, rad):
+def arr2arr_match(arr1, arr2, rad=0):
   assert arr1.dtype == float, "arr1 must not contain non-numeric values like None or Strings"
   assert arr2.dtype == float, "arr2 must not contain non-numeric values like None or Strings"
   assert not np.any(np.isnan(arr1)), "arr1 must not contain NaN values."
@@ -69,68 +39,7 @@ def arr2arr_match(arr1, arr2, rad):
   min_dist_idxs = np.argmin(dist_arr, axis=1)
   return min_dist_idxs  
 
-def correct_test():
-  BostonMA = (42.3601, -71.0589)
-  JawsBridgeMA = (41.4164, -70.5482)
-  DorchesterMA = (42.3016, -71.0677)
-  RumneyNH = (43.8073, -71.8159)
-  PlymouthNH = (43.7570, -71.6887)
-  CambridgeMA = (42.3736,- 71.1097)
-  CapeCodMA = (41.6688, -70.2962)
-  ArlingtonMA = (42.4154, -71.1565)
-  QuincyMA = (42.2529, -71.0023)
-  BangorME = (44.8012, -68.7778)
-  arr1 = np.array([BostonMA, RumneyNH, CapeCodMA])
-  arr2 = np.array([DorchesterMA,CambridgeMA,ArlingtonMA,BangorME,PlymouthNH,QuincyMA, JawsBridgeMA])
-  answer = np.array([0, 0, 0, 1, 1, 0, 2], 'int')
-  print(f"{arr2arr_match(arr2, arr1, 0)}\n{answer}")
 
-def fail_test1(): 
-  BostonMA = (42.3601, -71.0589)
-  JawsBridgeMA = (41.4164, -270.5482)
-  DorchesterMA = (42.3016, -71.0677)
-  RumneyNH = (43.8073, -71.8159)
-  PlymouthNH = (43.7570, -71.6887)
-  CambridgeMA = (42.3736,- 71.1097)
-  CapeCodMA = (41.6688, -70.2962)
-  ArlingtonMA = (42.4154, -71.1565)
-  QuincyMA = (42.2529, -71.0023)
-  BangorME = (44.8012, -68.7778)
-  arr1 = np.array([BostonMA, RumneyNH, CapeCodMA])
-  arr2 = np.array([DorchesterMA,CambridgeMA,ArlingtonMA,BangorME,PlymouthNH,QuincyMA, JawsBridgeMA])
-  arr2arr_match(arr1, arr2, 0)
-
-def fail_test2(): 
-  BostonMA = (42.3601, -71.0589)
-  JawsBridgeMA = (41.4164, None)
-  DorchesterMA = (42.3016, -71.0677)
-  RumneyNH = (43.8073, -71.8159)
-  PlymouthNH = (43.7570, -71.6887)
-  CambridgeMA = (42.3736,- 71.1097)
-  CapeCodMA = (41.6688, -70.2962)
-  ArlingtonMA = (42.4154, -71.1565)
-  QuincyMA = (42.2529, -71.0023)
-  BangorME = (44.8012, -68.7778)
-  arr1 = np.array([BostonMA, RumneyNH, CapeCodMA])
-  arr2 = np.array([DorchesterMA,CambridgeMA,ArlingtonMA,BangorME,PlymouthNH,QuincyMA, JawsBridgeMA])
-  arr2arr_match(arr1, arr2, 0)
-
-def fail_test3(): 
-  BostonMA = ("42.3601", "-71.0589")
-  JawsBridgeMA = (41.4164, -70.5482)
-  DorchesterMA = (42.3016, -71.0677)
-  RumneyNH = ("43.8073", "-71.8159")
-  PlymouthNH = (43.7570, -71.6887)
-  CambridgeMA = (42.3736,- 71.1097)
-  CapeCodMA = ("41.6688", "-70.2962")
-  ArlingtonMA = (42.4154, -71.1565)
-  QuincyMA = (42.2529, -71.0023)
-  BangorME = (44.8012, -68.7778)
-  arr1 = np.array([BostonMA, RumneyNH, CapeCodMA])
-  arr2 = np.array([DorchesterMA,CambridgeMA,ArlingtonMA,BangorME,PlymouthNH,QuincyMA, JawsBridgeMA])
-  arr2arr_match(arr1, arr2, 0)
-
-def test():
   correct_test()
   try:
     fail_test1()
