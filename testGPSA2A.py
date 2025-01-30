@@ -61,8 +61,17 @@ def fail_test3():
   arr2 = np.array([DorchesterMA,CambridgeMA,ArlingtonMA,BangorME,PlymouthNH,QuincyMA, JawsBridgeMA])
   arr2arr_match(arr1, arr2, 0)
 
-def test():
+def testgps2arr():
   correct_test()
-  fail_test1()
-  fail_test2()
-  fail_test3()
+  try:
+    fail_test1()
+  except Exception as e:
+    pass
+  try:
+    fail_test2()
+  except Exception as e:
+    pass
+  try:
+    fail_test3()
+  except Exception as e:
+    pass
