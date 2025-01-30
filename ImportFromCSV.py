@@ -14,7 +14,6 @@ def parse2float(degree_str):
     - Handles 'degrees' word in place of degree symbol
     """
     #get rid of extra stupid characters and names etc
-
     degree_str = degree_str.strip()
     degree_str = degree_str.replace("minutes", " ").replace("seconds", " ")
     degree_str = degree_str.replace("Minutes", " ").replace("Seconds", " ")
@@ -25,7 +24,7 @@ def parse2float(degree_str):
     degree_str = degree_str.replace("South", "S").replace("south", "S")
     degree_str = degree_str.replace("East", "E").replace("east", "E")
     degree_str = degree_str.replace("West", "W").replace("west", "W")
-
+    degree_str = degree_str.replace("Degrees", " ").replace("degrees", " ").replace("°", " ").replace("Degree", " ").replace("degree", " ")
 
     degree_str = re.sub(r'(\d+)\s(Degrees|degrees|°|Degree|degree)\s*(\d+)\s*(\d+(\.\d+)?)?', r'\1 \3 \4', degree_str)
     # the line above is a lot to process BUT I'll break it down
@@ -35,12 +34,8 @@ def parse2float(degree_str):
         - from here you should see the next \d grabs the minutes in group 3, ignores spaces or minute sympbol 
         - and grabs seconds in group 4
     '''
-    try:
-        return(float(degree_str))
-    except: 
-        pass
-
     match = re.match(r"^(-?\d+(\.\d+)?)(?:\s+(\d+(\.\d+)?))?(?:\s+(\d+(\.\d+)?))?\s+?([NSEWnsew])?$", degree_str)
+
     ''' 
         - ^ must start with a match 
         - -? grab a negative if present
@@ -50,6 +45,10 @@ def parse2float(degree_str):
         - groups 1 3 and 5 also contain 2 4 and 6, IE decimal values are contained in them.
         - group 7 is NSEW 
     '''
+    try:
+        return(float(degree_str))
+    except: 
+        pass
     if match:
         degrees = float(match.group(1))  # Degrees (including decimal part)
         # If minutes are present, process them
@@ -79,9 +78,9 @@ def import_coordinates_from_csv(filename):
             # Convert latitude and longitude to decimal degrees
             latitude_decimal = parse2float(latitude)
             longitude_decimal = parse2float(longitude)
-            
             # Add to list if both lat and long are valid
             if latitude_decimal is not None and longitude_decimal is not None:
+                
                 coordinates.append([latitude_decimal, longitude_decimal])
     return np.array(coordinates)
 
