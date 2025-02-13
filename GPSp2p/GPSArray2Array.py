@@ -42,5 +42,3 @@ def arr2arr_match(arr1, arr2, rad=0):
 
 
 
-
-
