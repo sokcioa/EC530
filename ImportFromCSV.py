@@ -75,11 +75,11 @@ def import_coordinates_from_csv(filename):
             latitude = normalized_row['latitude']
             longitude = normalized_row['longitude']
             
-            # Convert latitude and longitude to decimal degrees
-            latitude_decimal = parse2float(latitude)
-            longitude_decimal = parse2float(longitude)
             # Add to list if both lat and long are valid
-            if latitude_decimal is not None and longitude_decimal is not None:
+            if latitude is not None and longitude is not None:
+                # Convert latitude and longitude to decimal degrees
+                latitude_decimal = parse2float(latitude)
+                longitude_decimal = parse2float(longitude)
                 
                 coordinates.append([latitude_decimal, longitude_decimal])
     return np.array(coordinates)
