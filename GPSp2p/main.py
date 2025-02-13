@@ -1,7 +1,7 @@
 from GPSArray2Array import *
 from ImportFromCSV import *
 from testGPSA2A import testgps2arr
-from GenRandCoords import generate_random_gps
+from GPSp2p.GenRandCoords import generate_random_gps
 from line_profiler import LineProfiler as LP
 
 BP = "/Users/thomas/Documents/EC530"
