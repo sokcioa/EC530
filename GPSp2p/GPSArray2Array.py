@@ -40,24 +40,5 @@ def arr2arr_match(arr1, arr2, rad=0):
   return min_dist_idxs  
 
 
-  correct_test()
-  try:
-    fail_test1()
-  except Exception as e: 
-    print(f"fail_test1 failed: {e}")
-    #traceback.print_exc()
-  try:
-    fail_test2()
-  except Exception as e: 
-    print(f"fail_test2 failed: {e}") 
-    #traceback.print_exc()
-  try:
-    fail_test3()
-  except Exception as e: 
-    print(f"fail_test3 failed: {e}")
-    #traceback.print_exc()
-
-
-
 
 
