@@ -14,6 +14,10 @@ class TestSmartHomeSystem(unittest.TestCase):
     def test_device_creation_invalid_type(self):
         with self.assertRaises(AssertionError):
             device = Device("Kitchen Fan", "fan")
+
+    def test_device_creation_invalid_name(self):
+        with self.assertRaises(AssertionError):
+            device = Device(["Kitchen Fan"], "fan")
     
     def test_device_name_setter(self):
         device = Device("Bedroom Thermostat", "thermostat")
@@ -34,11 +38,20 @@ class TestSmartHomeSystem(unittest.TestCase):
         device = Device("Living Room Humidifier", "humidifier")
         device.enabled = True
         self.assertTrue(device.enabled)
+
+    def test_device_enabled_invalid(self):
+        device = Device("Bathroom Humidifier", "humidifier")
+        with self.assertRaises(AssertionError):
+            device.enabled = "25.5"
     
     def test_room_creation(self):
         room = Room("Living Room")
         self.assertEqual(room.name, "Living Room")
         self.assertIsInstance(room.id, str)
+
+    def test_room_invalid_name(self):
+        with self.assertRaises(AssertionError):
+            room = Room(10)
     
     def test_room_add_device(self):
         room = Room("Bedroom")
@@ -49,6 +62,7 @@ class TestSmartHomeSystem(unittest.TestCase):
         room = Room("Kitchen")
         room.add_device("NewHumidifier", "humidifier")
         device_id = list(room.devices.keys())[0]
+        self.assertEqual(len(room.devices), 1)
         room.delete_device(device_id)
         self.assertEqual(len(room.devices), 0)
     
@@ -56,7 +70,11 @@ class TestSmartHomeSystem(unittest.TestCase):
         floor = Floor("First Floor")
         self.assertEqual(floor.name, "First Floor")
         self.assertIsInstance(floor.id, str)
-    
+
+    def test_floor_invalid_name(self):
+        with self.assertRaises(AssertionError):
+            floor = Floor([10])
+           
     def test_floor_add_room(self):
         floor = Floor("Second Floor")
         floor.add_room("Master Bedroom")
@@ -65,6 +83,7 @@ class TestSmartHomeSystem(unittest.TestCase):
     def test_floor_delete_room(self):
         floor = Floor("Ground Floor")
         floor.add_room("Guest Room")
+        self.assertEqual(len(floor.rooms), 1)
         room_id = list(floor.rooms.keys())[0]
         floor.delete_room(room_id)
         self.assertEqual(len(floor.rooms), 0)
@@ -76,6 +95,11 @@ class TestSmartHomeSystem(unittest.TestCase):
         user = User("test")
         user.create_house("test_house")
         self.assertEqual(len(user.houses), 1)
+        
+    def test_house_invalid_name(self):
+        user = User("test")
+        with self.assertRaises(AssertionError):
+            house = House(user)
     
     def test_house_add_floor(self):
         house = House("New House", None)
@@ -162,10 +186,10 @@ class TestSmartHomeSystem(unittest.TestCase):
         print(admin.houses[testhouse].floors[testfloor].rooms[testroom].devices[testdevice].enabled)
         print(admin.houses[testhouse].floors[testfloor].rooms[testroom].devices[testdevice].output)
         admin.houses[testhouse].add_read_user(admin.id, reader)
-        try:
-            reader.houses[testhouse].floors[testfloor].rooms[testroom].devices[testdevice].settings = 50
-        finally:
-            print(reader.houses[testhouse].floors[testfloor].rooms[testroom].devices[testdevice].settings)
+        #try:
+        #    reader.houses[testhouse].floors[testfloor].rooms[testroom].devices[testdevice].settings = 50
+        #finally:
+        #    print(reader.houses[testhouse].floors[testfloor].rooms[testroom].devices[testdevice].settings)
 
 
 

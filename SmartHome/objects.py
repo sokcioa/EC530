@@ -192,7 +192,7 @@ class User:
     
     @property
     def houses(self):
-        return self._houses if any(self._id in house._admins for house in self._houses.values()) else {house_id: immutables.Map(readonly = house) for house_id, house in self._houses.items()}
+        return self._houses if any(self._id in house._admins for house in self._houses.values()) else {house_id: house.clone() for house_id, house in self._houses.items()}
     
     def create_house(self, name : str):
         new_house = House(name, self.id)
