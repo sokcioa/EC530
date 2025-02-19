@@ -4,6 +4,7 @@ import immutables
 class Device:
     def __init__(self, name, device_type):
         assert device_type in {"thermostat", "humidifier"}, f"Invalid device type: {device_type}"
+        assert isinstance(name, str), "Name must be String"
         self.__name = name
         self.__id = str(uuid.uuid4())
         self.__type = device_type
@@ -17,6 +18,7 @@ class Device:
     
     @name.setter
     def name(self, new_name):
+        assert isinstance(new_name, str), "Name must be String"
         self.__name = new_name
     
     @property
@@ -42,6 +44,7 @@ class Device:
     
     @enabled.setter
     def enabled(self, enable : bool):
+        assert isinstance(enable, bool), "Enable is either True or False"
         self.__enabled = enable
 
     @property
@@ -50,6 +53,7 @@ class Device:
    
 class Room:
     def __init__(self, name):
+        assert isinstance(name, str), "Name must be String"
         self._name = name
         self._id = str(uuid.uuid4())
         self._devices = {}
@@ -60,6 +64,7 @@ class Room:
     
     @name.setter
     def name(self, new_name):
+        assert isinstance(new_name, str), "Name must be String"
         self._name = new_name
     
     @property
@@ -71,6 +76,7 @@ class Room:
         return self._devices
     
     def add_device(self, deviceType, name):
+        assert isinstance(name, str), "Name must be String"
         device = Device(deviceType, name)
         self._devices[device.id] = device
         return device.id
@@ -80,6 +86,7 @@ class Room:
 
 class Floor:
     def __init__(self, name):
+        assert isinstance(name, str), "Name must be String"
         self._name = name
         self._id = str(uuid.uuid4())
         self._rooms = {}
@@ -92,6 +99,7 @@ class Floor:
     
     @name.setter
     def name(self, new_name):
+        assert isinstance(new_name, str), "Name must be String"
         self._name = new_name
     
     @property
@@ -113,6 +121,7 @@ class Floor:
 
 class House:
     def __init__(self, name, admin_id = None):
+        assert isinstance(name, str), "Name must be String"
         self._name = name
         self._id = str(uuid.uuid4())
         self._floors = {}
@@ -126,6 +135,7 @@ class House:
     
     @name.setter
     def name(self, new_name):
+        assert isinstance(new_name, str), "Name must be String"
         self._name = new_name
     
     @property
@@ -145,6 +155,7 @@ class House:
         del self.floors[floorid]
 
     def add_admin(self, admin_id, new_admin):
+        assert isinstance(new_admin, User), "New Admin must be of Type User"
         if admin_id in self._admins:
             self._admins.add(new_admin)
             new_admin.add_house(self)
@@ -152,6 +163,7 @@ class House:
             raise PermissionError("Only admins can add other admins.")
 
     def add_read_user(self, admin_id, user):
+        assert isinstance(user, User), "New User must be of Type User"
         if admin_id in self._admins:
             self._read_users.add(user)
             user.add_house(self)
@@ -160,6 +172,7 @@ class House:
 
 class User:
     def __init__(self, name):
+        assert isinstance(name, str), "Name must be String"
         self._name = name
         self._id = str(uuid.uuid4())
         self._houses = {}
@@ -170,6 +183,7 @@ class User:
     
     @name.setter
     def name(self, new_name : str):
+        assert isinstance(new_name, str), "Name must be String"
         self._name = new_name
 
     @property
@@ -186,7 +200,9 @@ class User:
         return new_house.id
 
     def add_house(self, house : House):
+        assert isinstance(house, House), "Input must be of type House"
         self._houses[house.id] = house
 
     def delete_house(self, houseid : str):
+        assert isinstance(houseid, str), "Input must be of type string IE HouseID"
         del self._houses[houseid]
