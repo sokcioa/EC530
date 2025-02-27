@@ -1,192 +1,139 @@
 import uuid
-import immutables
+from pydantic import BaseModel, Field
+from typing import Dict, List, Set, Optional
 
-class Device:
-    def __init__(self, name, device_type):
-        assert device_type in {"thermostat", "humidifier"}, f"Invalid device type: {device_type}"
-        self.__name = name
-        self.__id = str(uuid.uuid4())
-        self.__type = device_type
-        self.__settings = 0
-        self.__enabled = False
-        self.__output = "0%"
-    
-    @property
-    def name(self):
-        return self.__name
-    
-    @name.setter
-    def name(self, new_name):
-        self.__name = new_name
-    
-    @property
-    def id(self):
-        return self.__id
-    
-    @property
-    def type(self):
-        return self.__type
-    
-    @property
-    def settings(self):
-        return self.__settings
-    
-    @settings.setter
-    def settings(self, new_setting : float):
-        assert isinstance(new_setting, float) or isinstance(new_setting, int), "Settings must be float"
-        self.__settings = new_setting
+houses_db: Dict[str, "House"] = {}
+floors_db: Dict[str, "Floor"] = {}
+rooms_db: Dict[str, "Room"] = {}
+devices_db: Dict[str, "Device"] = {}
 
-    @property
-    def enabled(self):
-        return self.__enabled
-    
-    @enabled.setter
-    def enabled(self, enable : bool):
-        self.__enabled = enable
+class Device(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    parent_id: str  # ID of the room it belongs to
+    name: str
+    device_type: str
+    settings: float = 0
+    enabled: bool = False
+    output: str = "0%"
 
-    @property
-    def output(self):
-        return self.__output
-   
-class Room:
-    def __init__(self, name):
-        self._name = name
-        self._id = str(uuid.uuid4())
-        self._devices = {}
+    def __init__(self, **data):
+        super().__init__(**data)
+        assert self.device_type in {"thermostat", "humidifier"}, f"Invalid device type: {self.device_type}"
 
-    @property
-    def name(self):
-        return self._name
-    
-    @name.setter
-    def name(self, new_name):
-        self._name = new_name
-    
-    @property
-    def id(self):
-        return self._id
-    
-    @property
-    def devices(self):
-        return self._devices
-    
-    def add_device(self, deviceType, name):
-        device = Device(deviceType, name)
-        self._devices[device.id] = device
+
+class Room(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    parent_id: str  # ID of the floor it belongs to
+    name: str
+    devices: List[str] = Field(default_factory=list)
+
+    def add_device(self, name: str, device_type: str) -> str:
+        device = Device(name=name, device_type=device_type, parent_id=self.id)
+        self.devices[device.id] = device
         return device.id
 
-    def delete_device(self, deviceid):
-        del self._devices[deviceid]
+    def get_device(self, device_id: str) -> Optional[Device]:
+        return self.devices.get(device_id)
 
-class Floor:
-    def __init__(self, name):
-        self._name = name
-        self._id = str(uuid.uuid4())
-        self._rooms = {}
-        self._admins = set()
-        self._read_users = set()
+    def update_device(self, device_id: str, **kwargs):
+        if device_id in self.devices:
+            for key, value in kwargs.items():
+                setattr(self.devices[device_id], key, value)
 
-    @property
-    def name(self):
-        return self._name
-    
-    @name.setter
-    def name(self, new_name):
-        self._name = new_name
-    
-    @property
-    def id(self):
-        return self._id
-    
-    @property
-    def rooms(self):
-        return self._rooms 
-    
-    def add_room(self, name):
-        room = Room(name)
+    def delete_device(self, device_id: str):
+        self.devices.pop(device_id, None)
+
+
+class Floor(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    parent_id: str  # ID of the house it belongs to
+    name: str
+    rooms: List[str] = Field(default_factory=list)
+    admins: List[str] = Field(default_factory=list)
+    read_users: List[str] = Field(default_factory=list)
+
+    def add_room(self, name: str) -> str:
+        room = Room(name=name, parent_id=self.id)
         self.rooms[room.id] = room
         return room.id
 
-    def delete_room(self, roomid):
-        del self.rooms[roomid]
+    def get_room(self, room_id: str) -> Optional[Room]:
+        return self.rooms.get(room_id)
+
+    def update_room(self, room_id: str, **kwargs):
+        if room_id in self.rooms:
+            for key, value in kwargs.items():
+                setattr(self.rooms[room_id], key, value)
+
+    def delete_room(self, room_id: str):
+        self.rooms.pop(room_id, None)
 
 
-class House:
-    def __init__(self, name, admin_id = None):
-        self._name = name
-        self._id = str(uuid.uuid4())
-        self._floors = {}
-        self._admins = set()
-        self._admins.add(admin_id)
-        self._read_users = set()
+class House(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    parent_id: str  # ID of the user who owns it
+    name: str
+    floors: List[str] = Field(default_factory=list)
+    admins: List[str] = Field(default_factory=list)
+    read_users: List[str] = Field(default_factory=list)    
     
-    @property
-    def name(self):
-        return self._name
-    
-    @name.setter
-    def name(self, new_name):
-        self._name = new_name
-    
-    @property
-    def id(self):
-        return self._id
-    
-    @property
-    def floors(self):
-        return self._floors 
-    
-    def add_floor(self, name):
-        floor = Floor(name)
+    def __init__(self, **data):
+        super().__init__(**data)
+        if self.id not in self.admins:
+            self.admins.append(self.parent_id)
+
+    def add_floor(self, name: str) -> str:
+        floor = Floor(name=name, parent_id=self.id)
         self.floors[floor.id] = floor
         return floor.id
 
-    def delete_floor(self, floorid):
-        del self.floors[floorid]
+    def get_floor(self, floor_id: str) -> Optional[Floor]:
+        return self.floors.get(floor_id)
 
-    def add_admin(self, admin_id, new_admin):
-        if admin_id in self._admins:
-            self._admins.add(new_admin)
+    def update_floor(self, floor_id: str, **kwargs):
+        if floor_id in self.floors:
+            for key, value in kwargs.items():
+                setattr(self.floors[floor_id], key, value)
+
+    def delete_floor(self, floor_id: str):
+        self.floors.pop(floor_id, None)
+
+    def add_admin(self, admin_id: str, new_admin: "User"):
+        if admin_id in self.admins:
+            self.admins.append(new_admin.id)
             new_admin.add_house(self)
         else:
             raise PermissionError("Only admins can add other admins.")
 
-    def add_read_user(self, admin_id, user):
-        if admin_id in self._admins:
-            self._read_users.add(user)
-            user.add_house(self)
+    def add_read_user(self, admin_id: str, user: "User"):
+        if admin_id in self.admins:
+            self.read_users.append(user.id)
+            user.add_house(self.id)
         else:
             raise PermissionError("Only admins can add read users.")
 
-class User:
-    def __init__(self, name):
-        self._name = name
-        self._id = str(uuid.uuid4())
-        self._houses = {}
 
-    @property
-    def name(self):
-        return self._name
-    
-    @name.setter
-    def name(self, new_name : str):
-        self._name = new_name
+class User(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    houses: List[str] = Field(default_factory=list)
 
-    @property
-    def id(self):
-        return self._id
-    
-    @property
-    def houses(self):
-        return self._houses if any(self._id in house._admins for house in self._houses.values()) else {house_id: immutables.Map(readonly = house) for house_id, house in self._houses.items()}
-    
-    def create_house(self, name : str):
-        new_house = House(name, self.id)
-        self._houses[new_house.id] = new_house
+    def create_house(self, name: str) -> str:
+        new_house = House(name=name, parent_id=self.id)
+        houses_db[new_house.id] = new_house
+        self.houses.append(new_house.id)
         return new_house.id
+    
+    def add_house(self, house):
+        self.houses[house]
 
-    def add_house(self, house : House):
-        self._houses[house.id] = house
+    def get_house(self, house_id: str) -> Optional[House]:
+        return self.houses.get(house_id)
 
-    def delete_house(self, houseid : str):
-        del self._houses[houseid]
+    def update_house(self, house_id: str, **kwargs):
+        if house_id in self.houses:
+            for key, value in kwargs.items():
+                setattr(self.houses[house_id], key, value)
+
+    def delete_house(self, house_id: str):
+        self.houses.pop(house_id, None)
