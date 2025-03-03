@@ -1,0 +1,11 @@
+This Folder contains a concurrency homework. 
+
+This homework will have a few parts
+
+1: a numpy matmul wrapper 
+
+2: a configureable queue size and number of subprocesses or subthreads
+
+3: a test procedure to explore the effects 
+
+
