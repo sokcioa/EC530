@@ -1,0 +1,73 @@
+with 4 workers, multi-threads wins every time 
+
+10 mults, 500x500 matrix
+Testing Multi-threading...
+Multi-threading Time: 0.0159 seconds
+Testing Multi-processing...
+Multi-processing Time: 0.2879 seconds
+
+1000 mults, 500x500 matrix
+Testing Multi-threading...
+Multi-threading Time: 3.4161 seconds
+Testing Multi-processing...
+Multi-processing Time: 18.9215 seconds
+
+10000 mults, 500x500 matrix 
+Testing Multi-threading...
+Multi-threading Time: 112.1549 seconds
+    1 worker: Testing Multi-threading...
+              Multi-threading Time: 196.8848 seconds
+Testing Multi-processing...
+zsh: killed     /usr/bin/python3 /Users/thomas/Documents/EC530/Concurrency/Multi-Test.py
+> Multi-Process Ran out of RAM and just didn't work
+
+10 mults, 5000x5000 matrix
+Testing Multi-threading...
+Multi-threading Time: 16.3404 seconds
+Testing Multi-processing...
+Multi-processing Time: 270.1300 seconds
+
+1000 mults, 50x50
+Testing Multi-threading...
+Multi-threading Time: 0.0207 seconds
+Testing Multi-processing...
+Multi-processing Time: 0.3479 seconds
+
+6 and 8 workers crashes threads everyt time 
+
+1 worker 
+1000 mult, 500x500 
+Testing Multi-threading...
+Multi-threading Time: 2.5524 seconds
+Testing Multi-processing...
+Multi-processing Time: 10.7861 seconds
+
+2 workers 
+Multi-threading Time: 1.8196 seconds
+Testing Multi-processing...
+Multi-processing Time: 16.2548 seconds
+
+lets go back to 4 workers, but send a lot more job in a smaller queue! 
+50x2 mults, 500x500
+Testing Multi-threading...
+Multi-threading Time: 1.0081 seconds
+Testing Multi-processing...
+Multi-processing Time: 1.1905 seconds
+
+50x20 mults, 500x500
+Testing Multi-threading...
+Testing Multi-threading...
+Multi-threading Time: 1.1307 seconds
+Testing Multi-processing...
+Multi-processing Time: 1.6724 seconds
+
+50x200 = 10000 mults, 500x500
+Testing Multi-threading...
+Multi-threading Time: 1.9912 seconds
+Testing Multi-processing...
+Multi-processing Time: 1.7014 seconds
+
+50x2000 = 100000 mults, 500x500
+
+
+
