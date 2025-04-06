@@ -21,8 +21,7 @@ def worker(task_queue, result_queue):
             result_queue.put_nowait(result)
             print(result)
         except multiprocessing.queues.Empty:
-            print(f"waiting4Q")
-            continue
+            break
 
 class MatmulWrapper:
     def __init__(self, workers=4, use_multiprocessing=True, QueueSize = 100):
