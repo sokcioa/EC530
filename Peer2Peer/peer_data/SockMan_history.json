@@ -1,0 +1,116 @@
+{
+  "Xeno": [
+    {
+      "direction": "incoming",
+      "content": "Hello!",
+      "timestamp": "2025-04-06T20:21:29.790453"
+    },
+    {
+      "direction": "incoming",
+      "content": "Hello",
+      "timestamp": "2025-04-06T20:22:18.686498"
+    },
+    {
+      "direction": "outgoing",
+      "content": "Hello",
+      "timestamp": "2025-04-06T20:36:10.860693"
+    },
+    {
+      "direction": "outgoing",
+      "content": "Hi",
+      "timestamp": "2025-04-06T20:37:10.371229"
+    },
+    {
+      "direction": "outgoing",
+      "content": "Hello",
+      "timestamp": "2025-04-06T20:37:24.427630"
+    },
+    {
+      "direction": "incoming",
+      "content": "Hello",
+      "timestamp": "2025-04-06T20:38:48.821805"
+    },
+    {
+      "direction": "incoming",
+      "content": "Hello",
+      "timestamp": "2025-04-06T20:40:36.873140"
+    },
+    {
+      "direction": "incoming",
+      "content": "Hiu",
+      "timestamp": "2025-04-06T20:41:57.669340"
+    },
+    {
+      "direction": "outgoing",
+      "content": "Hello",
+      "timestamp": "2025-04-06T20:42:11.577184"
+    },
+    {
+      "direction": "incoming",
+      "content": "hey",
+      "timestamp": "2025-04-06T21:59:33.136805"
+    },
+    {
+      "direction": "outgoing",
+      "content": "ay",
+      "timestamp": "2025-04-06T22:19:40.332596"
+    },
+    {
+      "direction": "incoming",
+      "content": "u da sock",
+      "timestamp": "2025-04-06T22:20:07.766823"
+    }
+  ],
+  "T-Bo": [
+    {
+      "direction": "incoming",
+      "content": "Hey",
+      "timestamp": "2025-04-06T20:43:03.476880"
+    },
+    {
+      "direction": "incoming",
+      "content": "Hello",
+      "timestamp": "2025-04-06T21:16:02.851220"
+    },
+    {
+      "direction": "incoming",
+      "content": "Hello",
+      "timestamp": "2025-04-06T21:17:19.630452"
+    },
+    {
+      "direction": "outgoing",
+      "content": "Hey",
+      "timestamp": "2025-04-06T21:51:16.153752"
+    },
+    {
+      "direction": "outgoing",
+      "content": "wats good",
+      "timestamp": "2025-04-06T21:51:40.416559"
+    },
+    {
+      "direction": "incoming",
+      "content": "hey",
+      "timestamp": "2025-04-06T21:51:52.975266"
+    },
+    {
+      "direction": "outgoing",
+      "content": "you good? ",
+      "timestamp": "2025-04-06T21:52:02.832263"
+    },
+    {
+      "direction": "outgoing",
+      "content": "yooooo",
+      "timestamp": "2025-04-06T21:58:39.390301"
+    },
+    {
+      "direction": "incoming",
+      "content": "hi",
+      "timestamp": "2025-04-06T21:59:12.289947"
+    },
+    {
+      "direction": "outgoing",
+      "content": "HEY",
+      "timestamp": "2025-04-06T23:46:42.940261"
+    }
+  ]
+}
