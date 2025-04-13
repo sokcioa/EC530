@@ -1,0 +1,22 @@
+{
+  "Xeno": {
+    "username": "Xeno",
+    "ip": "192.168.1.247",
+    "port": 57838,
+    "profile": {
+      "status": "online",
+      "last_seen": "2025-04-06T22:19:17.221501"
+    },
+    "last_seen": "2025-04-06 22:19:17"
+  },
+  "T-Bo": {
+    "username": "T-Bo",
+    "ip": "192.168.1.247",
+    "port": 58253,
+    "profile": {
+      "status": "online",
+      "last_seen": "2025-04-06T23:46:35.264791"
+    },
+    "last_seen": "2025-04-06 23:46:35"
+  }
+}

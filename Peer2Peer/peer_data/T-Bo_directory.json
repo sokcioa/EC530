@@ -1,0 +1,22 @@
+{
+  "SockMan": {
+    "username": "SockMan",
+    "ip": "192.168.1.247",
+    "port": 57833,
+    "profile": {
+      "status": "online",
+      "last_seen": "2025-04-06T21:59:05.689186"
+    },
+    "last_seen": "2025-04-06 21:59:05"
+  },
+  "Xeno": {
+    "username": "Xeno",
+    "ip": "192.168.1.247",
+    "port": 57838,
+    "profile": {
+      "status": "online",
+      "last_seen": "2025-04-06T22:19:17.221501"
+    },
+    "last_seen": "2025-04-06 22:19:17"
+  }
+}
