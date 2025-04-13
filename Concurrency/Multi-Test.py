@@ -8,15 +8,15 @@ from MultiMatMulWrapper import *
 if __name__ == "__main__":
     import time
 
-    size = 1
-    num_tasks = 2
-    reps = 3
+    size = 500
+    num_tasks = 51
+    reps = 200
 
     tasks = [(np.random.rand(size, size), np.random.rand(size, size)) for _ in range(2*num_tasks)]
 
     print("Testing Multi-threading...")
     matmul_threaded = MatmulWrapper(workers=2, use_multiprocessing=False)
-
+    matmul_threaded.start_workers()
 
     i = 1
     t = 1    

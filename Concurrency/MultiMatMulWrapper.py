@@ -18,8 +18,8 @@ def worker(task_queue, result_queue):
 
             A, B = matrices
             result = np.matmul(A, B)
-            result_queue.put_nowait(result)
-            print(result)
+            #result_queue.put_nowait(result)
+            #print(result)
         except multiprocessing.queues.Empty:
             break
 
@@ -55,7 +55,7 @@ class MatmulWrapper:
                     break
                 A, B = matrices
                 result = np.matmul(A, B)
-                self.result_queue.put_nowait(result)
+                #self.result_queue.put_nowait(result)
             except queue.Empty:
                 break
 
@@ -73,7 +73,6 @@ class MatmulWrapper:
             return False 
         try:
             self.task_queue.put_nowait((A, B))
-            self.start_workers()
             return True
         except:
             return False
