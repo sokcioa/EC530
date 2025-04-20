@@ -169,3 +169,50 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Miniconda installers
+Miniconda3-latest-MacOSX-x86_64.sh
+Miniconda3-latest-MacOSX-arm64.sh
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Redis
+*.rdb
+*.aof
+dump.rdb
+appendonly.aof
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+
+# User profiles
+profiles/
+*.profile
+
+# Test coverage
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+
+# Distribution
+*.tar.gz
+*.zip
+*.rar

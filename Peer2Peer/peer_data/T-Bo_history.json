@@ -1,0 +1,96 @@
+{
+  "SockMan": [
+    {
+      "direction": "outgoing",
+      "content": "Hey",
+      "timestamp": "2025-04-06T20:43:04.478202"
+    },
+    {
+      "direction": "outgoing",
+      "content": "Hello",
+      "timestamp": "2025-04-06T21:16:03.853635"
+    },
+    {
+      "direction": "outgoing",
+      "content": "Hello",
+      "timestamp": "2025-04-06T21:17:20.640803"
+    },
+    {
+      "direction": "incoming",
+      "content": "Hey",
+      "timestamp": "2025-04-06T21:51:16.150776"
+    },
+    {
+      "direction": "incoming",
+      "content": "wats good",
+      "timestamp": "2025-04-06T21:51:40.414079"
+    },
+    {
+      "direction": "outgoing",
+      "content": "hey",
+      "timestamp": "2025-04-06T21:51:52.978242"
+    },
+    {
+      "direction": "incoming",
+      "content": "you good? ",
+      "timestamp": "2025-04-06T21:52:02.829784"
+    },
+    {
+      "direction": "incoming",
+      "content": "yooooo",
+      "timestamp": "2025-04-06T21:58:39.388317"
+    },
+    {
+      "direction": "outgoing",
+      "content": "hi",
+      "timestamp": "2025-04-06T21:59:12.292427"
+    },
+    {
+      "direction": "incoming",
+      "content": "HEY",
+      "timestamp": "2025-04-06T23:46:42.938266"
+    }
+  ],
+  "Xeno": [
+    {
+      "direction": "outgoing",
+      "content": "hey",
+      "timestamp": "2025-04-06T20:43:49.164130"
+    },
+    {
+      "direction": "outgoing",
+      "content": "hello",
+      "timestamp": "2025-04-06T20:44:14.979012"
+    },
+    {
+      "direction": "incoming",
+      "content": "HELLO",
+      "timestamp": "2025-04-06T21:58:25.341611"
+    },
+    {
+      "direction": "outgoing",
+      "content": "yo",
+      "timestamp": "2025-04-06T22:19:47.889644"
+    },
+    {
+      "direction": "incoming",
+      "content": "hey",
+      "timestamp": "2025-04-06T22:20:16.613966"
+    },
+    {
+      "direction": "outgoing",
+      "content": "yoyo",
+      "timestamp": "2025-04-06T22:20:28.539778"
+    },
+    {
+      "direction": "incoming",
+      "content": "hey lively",
+      "timestamp": "2025-04-06T22:23:31.696020"
+    },
+    {
+      "direction": "incoming",
+      "content": "hey",
+      "timestamp": "2025-04-06T23:46:59.696370"
+    }
+  ]
+}
