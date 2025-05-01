@@ -1,0 +1,72 @@
+The purpose of this Project is to enable and simplify errands with a special focus on accessibility
+
+The Meat will be user input and Calendar syncing
+    1: (OPTIONAL) user signs into google account and syncs calendar
+        Calendar entries need locations or the user will be prompted 
+            to add locations 
+                ignore <this> entry without location EX: John's Birthday Reminder
+            ignore entries without locations 
+            to define access type
+    2: User adds home address
+        This will be the default address for Free Time 
+    3: User adds an errand or errands containing 
+        <title / type> 
+        <Store_Name or exact_location or remote> 
+            <remote> like call dentist to scedule cleaning
+            <exact_location> like my persciroption is at THIS walgreens 
+            <exact_location> we are meeting at This gps for picnic
+            <store_name> like I need to get dog food from any Costco 
+        <Priority>
+            I need to feed and walk my dog every day
+            but if I run out of groceries I can order delivery
+        <Access_Type>
+            Drive
+            Bus
+            Train
+            All Transit
+            Bike
+            Walk 
+        <expected time spend at that location> 
+            In Minutes 
+        <repeat interval> 
+            never, daily, Every X days 
+            weekly, weekly on X days,
+            monthly, monthly but only on X days, 
+                EX: I only want to get dog food from Costco during the week
+            yearly, yearly but only on x days
+        <Interval range in days or hours etc> 
+            repeat interval +- Z days / hours 
+            at least Y days inbetween 
+            EX: I need to pick up my persciroption every 30 days exactly 
+                I need to get dog food every month +- 3 days 
+                I need to feed and walk my dog between 3PM and 5PM 
+                    @home or @specific address
+                I have to be at work for 9 hours, between 
+    4: On update: Errand Planner will review calender and find best errand times / locations
+    <Using Google Maps API>
+        First, All time is labeled as free time 
+        Stage 1: Plan Route to and from already planned locations / times using access type 
+                Prioritize by length of planned time
+                Prompt user to change acesss type or location if transit time overlaps any other planned errand
+        Stage 2: Loop down priority levels and iterarte 
+                For errands with particular locations 
+                    A: Grab nearest locations within time range with enough free time 
+                    B: Solidify most efficient time to errand                        
+
+                For errands with only store names the planner will 
+                    A: Grab locations nearest to every already planned location within allowed time range 
+                        and without preventing missing any other interval
+                    B: Grab locations nearest to already planned path 
+                            paying particular attention to access type when it is transit
+                            need locations near stops, locations near stops with fewest changes 
+                    C: Solidify the least travel time location for this errand 
+
+                If an errand cannot be planned, see if a surrounding errands can be moved 
+                    flow up streams to shift multiple errands if needed and possible
+                    If that cannot work, return all errands to original time and find best fit time then prompt user to decide to:
+                        change time or range of sourounding errands 
+                        change current errands range 
+    <Additinoal functionality>
+        1: Tell planner you've completed X errand 
+        2: Tell planner tranist time was Z or errand time was Y for X errand
+

@@ -1,0 +1,38 @@
+An ICE Monitor will have a few outputs: 
+    1: the monitor, which will have stats on display
+        5 or 6 long graphs for time 
+        10 or so measurements available to display 
+    2: An alarm system, maybe a few alarm tyoes 
+
+ICU HM will have a handful of devices to read from 
+    1: Finger monitor with simple ECG, SpO2
+    2: Blood Presure Cuff of some kind 
+    3: Motion capture system to allert for falls or potential falls 
+    4: Body Temperature monitor 
+
+The monitor outputs / buttons to switch to outputs:
+    1: Standard Display 
+    2: Configure Standard Display 
+        locations, colors  
+    3: Configure alerts
+
+
+All Devices print to a document DB
+    DB should keep a significant amount of history so data can be reviewed for trends etc,
+        esp in reference to changes in mediction etc
+Monitor has a background / mini DB architecture that:
+    updates in a static period from the DB say every 10ms 
+    stores graph and display variables to be referenced when needed 
+    is aware of date / time for medicine doses 
+
+1: devices print to tables in a large DB 
+2: Monitor allows entry for 
+    Medicine and interval 
+    Alerts based on devices
+    Colors and Numeric + Graphical Locations of 
+3: Monitor mini DB 
+    Stores circular graphical data 
+    Gets device data to be displayed
+    Stores date / time medicine alerts 
+    Pushes date / time medicine to bigDB
+
