@@ -327,9 +327,8 @@ config.json
 *.swr
 *.swq
 
-# Google OAuth2 credentials
-googleOath2Credentials.json
-googleOAuth2Credentials.json
-google-oauth2-credentials.json
-google_oauth2_credentials.json
+# Google OAuth credentials
 FinalProject/api/googleOauth2Credentials.json
+FinalProject/api/googleOAuth2Credentials.json
+FinalProject/api/google-oauth2-credentials.json
+FinalProject/api/google_oauth2_credentials.json
