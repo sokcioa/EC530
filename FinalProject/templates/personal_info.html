@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Personal Information</h2>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endif %}
+                    
+                    <form method="POST" action="{{ url_for('personal_info') }}">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="{{ name if name else (session.google_user_info.name if session.google_user_info else '') }}" 
+                                   required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="home_address" class="form-label">Home Address</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="home_address" name="home_address" 
+                                       value="{{ home_address if home_address else '' }}" required>
+                                <button type="button" class="btn btn-outline-secondary" id="validate_address_btn">
+                                    Validate Address
+                                </button>
+                            </div>
+                            <div class="form-text">Enter your complete home address for better location suggestions.</div>
+                            <div id="address_validation_result" class="mt-2"></div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Save Information</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('validate_address_btn').addEventListener('click', function() {
+        const address = document.getElementById('home_address').value;
+        const resultDiv = document.getElementById('address_validation_result');
+        const addressInput = document.getElementById('home_address');
+        
+        if (address.length < 5) {
+            resultDiv.innerHTML = '<div class="alert alert-warning">Please enter a longer address</div>';
+            return;
+        }
+        
+        resultDiv.innerHTML = '<div class="alert alert-info">Validating address...</div>';
+        
+        const formData = new FormData();
+        formData.append('address', address);
+        
+        fetch('/validate_address', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.valid && data.address) {
+                resultDiv.innerHTML = '<div class="alert alert-success">Address is valid!</div>';
+                addressInput.classList.remove('is-invalid');
+                addressInput.classList.add('is-valid');
+                // Update the input field with the validated address
+                addressInput.value = data.address;
+            } else {
+                const errorMessage = data.error || 'Invalid address. Please check and try again.';
+                resultDiv.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+                addressInput.classList.remove('is-valid');
+                addressInput.classList.add('is-invalid');
+            }
+        })
+        .catch(error => {
+            resultDiv.innerHTML = '<div class="alert alert-danger">Error validating address. Please try again.</div>';
+            console.error('Error:', error);
+        });
+    });
+</script>
+{% endblock %} 

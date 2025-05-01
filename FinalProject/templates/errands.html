@@ -1,0 +1,582 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .errand-messages {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+    .errand-messages .alert {
+        margin-bottom: 10px;
+        min-width: 300px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Add/Edit Errand</h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('errands') }}">
+                        {% if errand %}
+                        <input type="hidden" name="errand_id" value="{{ errand.id }}">
+                        {% endif %}
+                        <input type="hidden" name="new_errand" id="new_errand" value="false">
+                        
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   value="{{ errand.title if errand else '' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="location_type" class="form-label">Location Type</label>
+                            <select class="form-select" id="location_type" name="location_type" required>
+                                <option value="name" {% if errand and errand.location_type == 'name' %}selected{% endif %}>Name</option>
+                                <option value="category" {% if errand and errand.location_type == 'category' %}selected{% endif %}>Category</option>
+                                <option value="address" {% if errand and errand.location_type == 'address' %}selected{% endif %}>Address</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="access_type" class="form-label">Access Type</label>
+                            <select class="form-select" id="access_type" name="access_type" required>
+                                <option value="drive" {% if errand and errand.access_type == 'drive' %}selected{% endif %}>Drive</option>
+                                <option value="bus" {% if errand and errand.access_type == 'bus' %}selected{% endif %}>Bus</option>
+                                <option value="train" {% if errand and errand.access_type == 'train' %}selected{% endif %}>Train</option>
+                                <option value="all_transit" {% if errand and errand.access_type == 'all_transit' %}selected{% endif %}>All Transit</option>
+                                <option value="bike" {% if errand and errand.access_type == 'bike' %}selected{% endif %}>Bike</option>
+                                <option value="walk" {% if errand and errand.access_type == 'walk' %}selected{% endif %}>Walk</option>
+                            </select>
+                            <div class="form-text">How you plan to get to this location</div>
+                        </div>
+
+                        <div id="location_name_group" class="mb-3" style="display: none;">
+                            <label for="location_name" class="form-label">Location Name</label>
+                            <input type="text" class="form-control" id="location_name" name="location_name" 
+                                   value="{{ errand.location_name if errand else '' }}">
+                        </div>
+
+                        <div id="category_group" class="mb-3" style="display: none;">
+                            <label for="category" class="form-label">Category</label>
+                            <input type="text" class="form-control" id="category" name="category" 
+                                   value="{{ errand.category if errand else '' }}">
+                        </div>
+
+                        <div id="address_group" class="mb-3" style="display: none;">
+                            <label for="address" class="form-label">Address</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="address" name="location_address" 
+                                       value="{{ errand.location_address if errand else '' }}">
+                                <button type="button" class="btn btn-outline-secondary" id="validate_address_btn">
+                                    Validate Address
+                                </button>
+                            </div>
+                            <div id="address_validation_result" class="mt-2"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Complementary Errands</label>
+                            <div id="complementary_errands_container">
+                                {% if errand and errand.complementary_errands %}
+                                    {% for comp_id in errand.complementary_errands.split(',') %}
+                                        {% if comp_id %}
+                                            {% for e in errands %}
+                                                {% if e.id|string == comp_id %}
+                                                    <div class="input-group mb-2 complementary-errand-group">
+                                                        <select class="form-select" name="complementary_errands[]">
+                                                            <option value="">Select an errand...</option>
+                                                            {% for e2 in errands %}
+                                                                {% if e2.id != errand.id %}
+                                                                    <option value="{{ e2.id }}" {% if e2.id == e.id %}selected{% endif %}>{{ e2.title }}</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </select>
+                                                        <button type="button" class="btn btn-outline-danger remove-complementary">Remove</button>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <button type="button" class="btn btn-outline-primary mt-2" id="add_complementary">
+                                <i class="bi bi-plus"></i> Add Complementary Errand
+                            </button>
+                            <div class="form-text">Select errands that cannot be done on the same day</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="valid_start_window" class="form-label">Valid Start Time (HHMM)</label>
+                            <input type="text" class="form-control" id="valid_start_window" name="valid_start_window" 
+                                   value="{{ errand.valid_start_window if errand else '1530' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="valid_end_window" class="form-label">Valid End Time (HHMM)</label>
+                            <input type="text" class="form-control" id="valid_end_window" name="valid_end_window" 
+                                   value="{{ errand.valid_end_window if errand else '1800' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="estimated_duration" class="form-label">Estimated Duration (minutes)</label>
+                            <input type="number" class="form-control" id="estimated_duration" name="estimated_duration" 
+                                   value="{{ errand.estimated_duration if errand else '30' }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="repetition" class="form-label">Repetition</label>
+                            <select class="form-select" id="repetition" name="repetition" required>
+                                <option value="none" {% if errand and errand.repetition == 'none' %}selected{% endif %}>None</option>
+                                <option value="daily" {% if errand and errand.repetition == 'daily' %}selected{% endif %}>Daily</option>
+                                <option value="weekly" {% if errand and errand.repetition == 'weekly' %}selected{% endif %}>Weekly</option>
+                                <option value="bi-weekly" {% if errand and errand.repetition == 'bi-weekly' %}selected{% endif %}>Bi-weekly</option>
+                                <option value="monthly" {% if errand and errand.repetition == 'monthly' %}selected{% endif %}>Monthly</option>
+                                <option value="yearly" {% if errand and errand.repetition == 'yearly' %}selected{% endif %}>Yearly</option>
+                            </select>
+                        </div>
+
+                        <div id="valid_days_group" class="mb-3" style="display: none;">
+                            <label class="form-label">Valid Days</label>
+                            <div class="form-check">
+                                {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                <input class="form-check-input" type="checkbox" name="valid_days" value="{{ day }}" 
+                                       id="valid_days_{{ day }}" {% if errand and day in (errand.valid_days or '').split(',') %}checked{% endif %}>
+                                <label class="form-check-label" for="valid_days_{{ day }}">{{ day }}</label><br>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div id="bi_weekly_group" class="mb-3" style="display: none;">
+                            <label class="form-label">Week 1 Days</label>
+                            <div class="form-check">
+                                {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                <input class="form-check-input" type="checkbox" name="valid_days_week1" value="{{ day }}" 
+                                       id="valid_days_week1_{{ day }}" {% if errand and day in (errand.valid_days_week1 or '').split(',') %}checked{% endif %}>
+                                <label class="form-check-label" for="valid_days_week1_{{ day }}">{{ day }}</label><br>
+                                {% endfor %}
+                            </div>
+                            
+                            <label class="form-label mt-3">Week 2 Days</label>
+                            <div class="form-check">
+                                {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                <input class="form-check-input" type="checkbox" name="valid_days_week2" value="{{ day }}" 
+                                       id="valid_days_week2_{{ day }}" {% if errand and day in (errand.valid_days_week2 or '').split(',') %}checked{% endif %}>
+                                <label class="form-check-label" for="valid_days_week2_{{ day }}">{{ day }}</label><br>
+                                {% endfor %}
+                            </div>
+
+                            <div class="mt-3">
+                                <label for="starting_monday" class="form-label">Starting Monday</label>
+                                <input type="date" class="form-control" id="starting_monday" name="starting_monday" 
+                                       value="{{ errand.starting_monday if errand else '' }}" 
+                                       {% if errand and errand.repetition == 'bi-weekly' %}required{% endif %}>
+                            </div>
+                        </div>
+
+                        <div id="frequency_group" class="mb-3" style="display: none;">
+                            <label for="frequency" class="form-label">Number of Times per Period</label>
+                            <input type="number" class="form-control" id="frequency" name="frequency" 
+                                   value="{{ errand.frequency if errand else '1' }}" min="1" required>
+                            <div class="form-text" id="frequency_help">How many times you want to do this errand per period</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="minimum_interval" class="form-label">Minimum Rest Period</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="minimum_interval" name="minimum_interval" 
+                                       value="{{ errand.minimum_interval if errand else '24' }}" min="1" required>
+                                <select class="form-select" id="interval_unit" name="interval_unit">
+                                    <option value="hours" {% if errand and errand.interval_unit == 'hours' %}selected{% endif %}>Hours</option>
+                                    <option value="days" {% if errand and errand.interval_unit == 'days' %}selected{% endif %}>Days</option>
+                                    <option value="weeks" {% if errand and errand.interval_unit == 'weeks' %}selected{% endif %}>Weeks</option>
+                                    <option value="months" {% if errand and errand.interval_unit == 'months' %}selected{% endif %}>Months</option>
+                                </select>
+                            </div>
+                            <div class="form-text">Minimum time between occurrences of this errand</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="priority" class="form-label">Priority (1-5)</label>
+                            <select class="form-select" id="priority" name="priority" required>
+                                <option value="1" {% if errand and errand.priority == 1 %}selected{% endif %}>1 - Lowest</option>
+                                <option value="2" {% if errand and errand.priority == 2 %}selected{% endif %}>2 - Low</option>
+                                <option value="3" {% if errand and errand.priority == 3 %}selected{% endif %}>3 - Medium</option>
+                                <option value="4" {% if errand and errand.priority == 4 %}selected{% endif %}>4 - High</option>
+                                <option value="5" {% if errand and errand.priority == 5 %}selected{% endif %}>5 - Highest</option>
+                            </select>
+                            <div class="form-text">Higher priority errands will be scheduled first</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Save Errand</button>
+                            <button type="button" class="btn btn-secondary" id="clearFields">Clear Fields</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Your Errands</h2>
+                </div>
+                <div class="card-body">
+                    {% if errands %}
+                    <div class="list-group">
+                        {% for e in errands %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-1">{{ e.title }}</h5>
+                                <div>
+                                    <a href="{{ url_for('errands', errand_id=e.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <button class="btn btn-sm btn-outline-danger delete-errand" data-id="{{ e.id }}">Delete</button>
+                                </div>
+                            </div>
+                            <p class="mb-1">
+                                {% if e.location_type == 'name' %}
+                                Location: {{ e.location_name }}
+                                {% elif e.location_type == 'category' %}
+                                Category: {{ e.category }}
+                                {% else %}
+                                Address: {{ e.location_address }}
+                                {% endif %}
+                            </p>
+                            <small>
+                                Time: {{ e.valid_start_window }}-{{ e.valid_end_window }} | 
+                                Duration: {{ e.estimated_duration }}min | 
+                                Repeat: {{ e.repetition }} |
+                                Priority: {{ e.priority }}
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p>No errands yet. Add your first errand above!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="errand-messages">
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ success }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Show/hide location type specific fields
+    function updateLocationFields() {
+        const locationType = document.getElementById('location_type').value;
+        document.getElementById('location_name_group').style.display = locationType === 'name' ? 'block' : 'none';
+        document.getElementById('category_group').style.display = locationType === 'category' ? 'block' : 'none';
+        document.getElementById('address_group').style.display = locationType === 'address' ? 'block' : 'none';
+    }
+
+    // Show/hide repetition specific fields
+    function updateRepetitionFields() {
+        const repetition = document.getElementById('repetition').value;
+        document.getElementById('valid_days_group').style.display = 
+            repetition === 'weekly' ? 'block' : 'none';
+        document.getElementById('bi_weekly_group').style.display = 
+            repetition === 'bi-weekly' ? 'block' : 'none';
+        document.getElementById('frequency_group').style.display = 
+            repetition !== 'none' ? 'block' : 'none';
+        
+        // Update frequency help text
+        const frequencyHelp = document.getElementById('frequency_help');
+        if (frequencyHelp) {
+            frequencyHelp.textContent = `How many times you want to do this errand per ${repetition}`;
+        }
+    }
+
+    // Handle form submission
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, initializing form handlers');
+        
+        // Initialize location and repetition fields
+        updateLocationFields();
+        updateRepetitionFields();
+        
+        // Add event listeners for location type and repetition changes
+        document.getElementById('location_type').addEventListener('change', updateLocationFields);
+        document.getElementById('repetition').addEventListener('change', updateRepetitionFields);
+        
+        // Handle form submission
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevent default form submission
+                console.log('Form submission started');
+                
+                // Log form data
+                const formData = new FormData(form);
+                console.log('Form data:', Object.fromEntries(formData));
+                
+                // Validate required fields
+                const requiredFields = ['title', 'location_type', 'access_type', 'valid_start_window', 
+                                     'valid_end_window', 'estimated_duration', 'repetition'];
+                const missingFields = requiredFields.filter(field => !formData.get(field));
+                
+                if (missingFields.length > 0) {
+                    console.error('Missing required fields:', missingFields);
+                    alert(`Please fill in all required fields: ${missingFields.join(', ')}`);
+                    return;
+                }
+                
+                // Validate time format
+                const startTime = formData.get('valid_start_window');
+                const endTime = formData.get('valid_end_window');
+                if (!/^\d{4}$/.test(startTime) || !/^\d{4}$/.test(endTime)) {
+                    console.error('Invalid time format:', { startTime, endTime });
+                    alert('Time must be in HHMM format (e.g., 1530)');
+                    return;
+                }
+                
+                // Validate location-specific fields
+                const locationType = formData.get('location_type');
+                if (locationType === 'name' && !formData.get('location_name')) {
+                    console.error('Missing location name');
+                    alert('Please enter a location name');
+                    return;
+                }
+                if (locationType === 'category' && !formData.get('category')) {
+                    console.error('Missing category');
+                    alert('Please enter a category');
+                    return;
+                }
+                if (locationType === 'address' && !formData.get('location_address')) {
+                    console.error('Missing address');
+                    alert('Please enter an address');
+                    return;
+                }
+                
+                // Validate repetition-specific fields
+                const repetition = formData.get('repetition');
+                if (repetition === 'weekly' && !formData.getAll('valid_days').length) {
+                    console.error('No valid days selected for weekly repetition');
+                    alert('Please select at least one valid day');
+                    return;
+                }
+                if (repetition === 'bi-weekly') {
+                    if (!formData.getAll('valid_days_week1').length || !formData.getAll('valid_days_week2').length) {
+                        console.error('No valid days selected for bi-weekly repetition');
+                        alert('Please select at least one valid day for each week');
+                        return;
+                    }
+                    if (!formData.get('starting_monday')) {
+                        console.error('Missing starting Monday for bi-weekly repetition');
+                        alert('Please select a starting Monday');
+                        return;
+                    }
+                }
+                
+                // Determine if we're editing or creating
+                const errandId = formData.get('errand_id');
+                const isNewErrand = formData.get('new_errand') === 'true';
+                const method = (errandId && !isNewErrand) ? 'PUT' : 'POST';
+                const url = (errandId && !isNewErrand) ? `/errands/${errandId}` : '/errands';
+                
+                // Submit the form data
+                fetch(url, {
+                    method: method,
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Failed to save errand');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        // Show success message in the errand-messages container
+                        const successDiv = document.createElement('div');
+                        successDiv.className = 'alert alert-success alert-dismissible fade show';
+                        successDiv.innerHTML = `
+                            ${data.message || 'Errand saved successfully'}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+                        document.querySelector('.errand-messages').appendChild(successDiv);
+                        
+                        // Reload the page after a short delay
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(error.message || 'Error saving errand. Please try again.');
+                });
+            });
+        }
+        
+        // Handle delete errand
+        document.querySelectorAll('.delete-errand').forEach(button => {
+            button.addEventListener('click', function() {
+                const errandId = this.dataset.id;
+                console.log('Deleting errand:', errandId);
+                if (confirm('Are you sure you want to delete this errand?')) {
+                    fetch(`/errands/${errandId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            location.reload();
+                        } else {
+                            alert('Error deleting errand: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting errand:', error);
+                        alert('Error deleting errand. Please try again.');
+                    });
+                }
+            });
+        });
+
+        // Handle complementary errands
+        const addComplementaryBtn = document.getElementById('add_complementary');
+        if (addComplementaryBtn) {
+            addComplementaryBtn.addEventListener('click', function() {
+                console.log('Adding complementary errand');
+                const container = document.getElementById('complementary_errands_container');
+                const newGroup = document.createElement('div');
+                newGroup.className = 'input-group mb-2 complementary-errand-group';
+                newGroup.innerHTML = `
+                    <select class="form-select" name="complementary_errands[]">
+                        {% for e in errands %}
+                            <option value="{{ e.id }}">{{ e.title }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-outline-danger remove-complementary">Remove</button>
+                `;
+                container.appendChild(newGroup);
+            });
+        }
+        
+        // Handle remove complementary errand
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('remove-complementary')) {
+                console.log('Removing complementary errand');
+                e.target.closest('.complementary-errand-group').remove();
+            }
+        });
+
+        // Add clear fields functionality
+        document.getElementById('clearFields').addEventListener('click', function() {
+            // Set new_errand flag to true
+            document.getElementById('new_errand').value = 'true';
+            
+            // Clear all form fields
+            document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"]').forEach(input => {
+                input.value = '';
+            });
+            document.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            // Clear complementary errands
+            document.getElementById('complementary_errands_container').innerHTML = '';
+            // Reset location and repetition fields visibility
+            updateLocationFields();
+            updateRepetitionFields();
+        });
+    });
+
+    // Address validation
+    document.getElementById('validate_address_btn').addEventListener('click', function() {
+        const address = document.getElementById('address').value;
+        const resultDiv = document.getElementById('address_validation_result');
+        const addressInput = document.getElementById('address');
+        
+        if (!address) {
+            resultDiv.innerHTML = '<div class="alert alert-warning">Please enter an address</div>';
+            addressInput.classList.add('is-invalid');
+            return;
+        }
+        
+        if (address.length < 5) {
+            resultDiv.innerHTML = '<div class="alert alert-warning">Please enter a more complete address</div>';
+            addressInput.classList.add('is-invalid');
+            return;
+        }
+        
+        resultDiv.innerHTML = '<div class="alert alert-info">Validating address...</div>';
+        addressInput.classList.remove('is-invalid', 'is-valid');
+        
+        const formData = new FormData();
+        formData.append('address', address);
+        
+        fetch('/validate_address', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.valid && data.address) {
+                resultDiv.innerHTML = '<div class="alert alert-success">Address is valid!</div>';
+                addressInput.classList.remove('is-invalid');
+                addressInput.classList.add('is-valid');
+                // Update the input field with the validated address
+                addressInput.value = data.address;
+            } else {
+                const errorMessage = data.error || 'Invalid address. Please check and try again.';
+                resultDiv.innerHTML = `<div class="alert alert-danger">${errorMessage}</div>`;
+                addressInput.classList.remove('is-valid');
+                addressInput.classList.add('is-invalid');
+                
+                // Provide suggestions for common issues
+                if (errorMessage.includes('Invalid address')) {
+                    resultDiv.innerHTML += `
+                        <div class="mt-2">
+                            <small class="text-muted">Tips for entering addresses:</small>
+                            <ul class="mb-0">
+                                <li>Include street number and name</li>
+                                <li>Add city and state/province</li>
+                                <li>Include postal/zip code if possible</li>
+                                <li>Try adding more specific location details</li>
+                            </ul>
+                        </div>
+                    `;
+                }
+            }
+        })
+        .catch(error => {
+            resultDiv.innerHTML = '<div class="alert alert-danger">Error validating address. Please try again.</div>';
+            console.error('Error:', error);
+            addressInput.classList.remove('is-valid');
+            addressInput.classList.add('is-invalid');
+        });
+    });
+</script>
+{% endblock %} 
